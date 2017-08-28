@@ -1,13 +1,212 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="UTF-8" />
-        <title>{% block title %}Welcome!{% endblock %}</title>
-        {% block stylesheets %}{% endblock %}
-        <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
-    </head>
-    <body>
-        {% block body %}{% endblock %}
-        {% block javascripts %}{% endblock %}
-    </body>
+<head>
+    <meta charset="UTF-8" />
+    <title>{% block title %}ft_blog{% endblock %}</title>
+    {% block stylesheets %}
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+        <style>
+            /*
+             * Globals
+             */
+
+            @media (min-width: 48em) {
+                html {
+                    font-size: 18px;
+                }
+            }
+
+            body {
+                font-family: Georgia, "Times New Roman", Times, serif;
+                color: #555;
+            }
+
+            h1, .h1,
+            h2, .h2,
+            h3, .h3,
+            h4, .h4,
+            h5, .h5,
+            h6, .h6 {
+                font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+                font-weight: normal;
+                color: #333;
+            }
+
+
+            /*
+             * Override Bootstrap's default container.
+             */
+
+            .container {
+                max-width: 60rem;
+            }
+
+
+            /*
+             * Masthead for nav
+             */
+
+            .blog-masthead {
+                margin-bottom: 3rem;
+                background-color: #428bca;
+                -webkit-box-shadow: inset 0 -.1rem .25rem rgba(0,0,0,.1);
+                box-shadow: inset 0 -.1rem .25rem rgba(0,0,0,.1);
+            }
+
+            /* Nav links */
+            .nav-link {
+                position: relative;
+                padding: 1rem;
+                font-weight: 500;
+                color: #cdddeb;
+            }
+            .nav-link:hover,
+            .nav-link:focus {
+                color: #fff;
+                background-color: transparent;
+            }
+
+            /* Active state gets a caret at the bottom */
+            .nav-link.active {
+                color: #fff;
+            }
+            .nav-link.active:after {
+                position: absolute;
+                bottom: 0;
+                left: 50%;
+                width: 0;
+                height: 0;
+                margin-left: -.3rem;
+                vertical-align: middle;
+                content: "";
+                border-right: .3rem solid transparent;
+                border-bottom: .3rem solid;
+                border-left: .3rem solid transparent;
+            }
+
+
+            /*
+             * Blog name and description
+             */
+
+            .blog-header {
+                padding-bottom: 1.25rem;
+                margin-bottom: 2rem;
+                border-bottom: .05rem solid #eee;
+            }
+            .blog-title {
+                margin-bottom: 0;
+                font-size: 2rem;
+                font-weight: normal;
+            }
+            .blog-description {
+                font-size: 1.1rem;
+                color: #999;
+            }
+
+            @media (min-width: 40em) {
+                .blog-title {
+                    font-size: 3.5rem;
+                }
+            }
+
+
+            /*
+             * Main column and sidebar layout
+             */
+
+            /* Sidebar modules for boxing content */
+            .sidebar-module {
+                padding: 1rem;
+                /*margin: 0 -1rem 1rem;*/
+            }
+            .sidebar-module-inset {
+                padding: 1rem;
+                background-color: #f5f5f5;
+                border-radius: .25rem;
+            }
+            .sidebar-module-inset p:last-child,
+            .sidebar-module-inset ul:last-child,
+            .sidebar-module-inset ol:last-child {
+                margin-bottom: 0;
+            }
+
+
+            /* Pagination */
+            .blog-pagination {
+                margin-bottom: 4rem;
+            }
+            .blog-pagination > .btn {
+                border-radius: 2rem;
+            }
+
+
+            /*
+             * Blog posts
+             */
+
+            .blog-post {
+                margin-bottom: 4rem;
+            }
+            .blog-post-title {
+                margin-bottom: .25rem;
+                font-size: 2.5rem;
+            }
+            .blog-post-meta {
+                margin-bottom: 1.25rem;
+                color: #999;
+            }
+
+
+            /*
+             * Footer
+             */
+
+            .blog-footer {
+                padding: 2.5rem 0;
+                color: #999;
+                text-align: center;
+                background-color: #f9f9f9;
+                border-top: .05rem solid #e5e5e5;
+            }
+            .blog-footer p:last-child {
+                margin-bottom: 0;
+            }
+        </style>
+    {% endblock %}
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
+</head>
+<body>
+{%  block navigation %}
+    <div class="blog-masthead">
+        <div class="container">
+            <nav class="nav">
+                <a class="nav-link {{(app.request.attributes.get('_route') == 'homepage') ? 'active' : ''}}" href="{{ path('homepage') }}">Home</a>
+                {% if app.user %}
+                    <a class="nav-link" href="{{ path('security_logout') }}">Logout</a>
+                    <a class="nav-link" href="{{ path('article_create') }}">New Article</a>
+                {% else %}
+                    <a class="nav-link {{(app.request.attributes.get('_route') == 'security_login') ? 'active' : ''}}" href="{{ path('security_login') }}">Login</a>
+                {% endif %}
+            </nav>
+        </div>
+    </div>
+{% endblock %}
+{% block header %}
+    <div class="blog-header">
+        <div class="container">
+            <h1 class="blog-title">ft_blog</h1>
+            <p class="lead blog-description">A very little blog made with Symfony 2.8 and Bootstrap</p>
+        </div>
+    </div>
+{% endblock %}
+<div class="container">
+    {% block content %}{% endblock %}
+</div>
+{% block javascripts %}
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" crossorigin="anonymous"></script>
+{% endblock %}
+</body>
 </html>
