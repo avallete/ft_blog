@@ -2,23 +2,47 @@
 # https://symfony.com/doc/current/security.html
 security:
 
-    # https://symfony.com/doc/current/security.html#b-configuring-how-users-are-loaded
+    encoders:
+        harsh:
+            algorithm: bcrypt
+            cost: 15
+
     providers:
-        in_memory:
-            memory: ~
-
+        our_db_provider:
+            entity:
+                class: AppBundle:User
+                property: username
     firewalls:
-        # disables authentication for assets and the profiler, adapt it according to your needs
-        dev:
-            pattern: ^/(_(profiler|wdt)|css|images|js)/
-            security: false
+            secured_area:
+                # this firewall applies to all URLs
+                pattern: ^/
 
-        main:
-            anonymous: ~
-            # activate different ways to authenticate
+                # but the firewall does not require login on every page
+                # denying access is done in access_control or in your controllers
+                anonymous: true
 
-            # https://symfony.com/doc/current/security.html#a-configuring-how-your-users-will-authenticate
-            #http_basic: ~
+                # This allows the user to login by submitting a username and password
+                # Reference: https://symfony.com/doc/current/security/form_login_setup.html
+                form_login:
+                    # The route name that the login form submits to
+                    check_path: security_login
+                    # The name of the route where the login form lives
+                    # When the user tries to access a protected page, they are redirected here
+                    login_path: security_login
+                    # Secure the login form against CSRF
+                    # Reference: https://symfony.com/doc/current/security/csrf_in_login_form.html
+                    csrf_token_generator: security.csrf.token_manager
+                    # The page users are redirect to when there is no previous page stored in the
+                    # session (for example when the users access directly to the login page).
+                    default_target_path: homepage
 
-            # https://symfony.com/doc/current/security/form_login_setup.html
-            #form_login: ~
+                logout:
+                    # The route name the user can go to in order to logout
+                    path: security_logout
+                    # The name of the route to redirect to after logging out
+                    target: homepage
+    access_control:
+        - { path: /article/*/delete, roles: [ROLE_USER, ROLE_ADMIN] }
+        - { path: /article/*/edit, roles: [ROLE_USER, ROLE_ADMIN] }
+        - { path: /article/new, roles: [ROLE_USER, ROLE_ADMIN] }
+        - { path: ^/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
