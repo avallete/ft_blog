@@ -27,23 +27,36 @@ class DefaultController extends Controller
     }
 
     /**
+     * @Route("/article/new", name="article_create")
+     * @Method({"GET","POST"})
+     */
+    public function createArticleAction(Request $request)
+    {
+        $error = null;
+        $article = new Article();
+        $em = $this->getDoctrine()->getManager();
+
+        try {
+            $article->setTitle('Your title');
+            $article->setDescription('Your Description');
+            $article->setAuthor($this->getUser());
+
+            $em->persist($article);
+            $em->flush();
+            return $this->render('default/edit_article.html.twig', ['article' => $article, 'error' => $error]);
+        }
+        catch (\Exception $e) {
+            return $this->redirectToRoute('homepage');
+        }
+    }
+
+    /**
      * @Route("/article/{id}", name="article_show")
      * @Method("GET")
      */
     public function showArticleAction(Article $article)
     {
         return $this->render('default/show_article.html.twig', ['article' => $article]);
-    }
-
-    /**
-     * @Route("/article/new", name="article_create")
-     * @Method({"GET","POST"})
-     */
-    public function createArticleAction(Request $request)
-    {
-        return $this->render('default/index.html.twig', array(
-            'base_dir' => realpath($this->container->getParameter('kernel.root_dir').'/..').DIRECTORY_SEPARATOR,
-        ));
     }
 
     /**
