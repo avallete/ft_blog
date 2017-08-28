@@ -14,6 +14,10 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
+
 
 class SecurityController extends Controller
 {
@@ -41,9 +45,39 @@ class SecurityController extends Controller
      */
     public function registerAction(Request $request)
     {
-        return $this->render('default/index.html.twig', array(
-            'base_dir' => realpath($this->container->getParameter('kernel.root_dir').'/..').DIRECTORY_SEPARATOR,
-        ));
+        $error = null;
+        $user = new User();
+        $form = $this->createForm(UserType::class, $user);
+
+        // 2) handle the submit (will only happen on POST)
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            // 3) Encode the password (you could also do this via Doctrine listener)
+            $encoded_password = $this->get('security.password_encoder')->encodePassword($user, $user->getPassword());
+            $user->setPassword($encoded_password);
+
+            try{
+                $em = $this->getDoctrine()->getManager();
+                $em->persist($user);
+                $em->flush();
+
+                // 4) Log the new created user, and redirect to homepage
+                $token = new UsernamePasswordToken($user, $user->getPassword(), "public", $user->getRoles());
+                $this->get("security.token_storage")->setToken($token);
+                $event = new InteractiveLoginEvent($request, $token);
+                $this->get("event_dispatcher")->dispatch("security.interactive_login", $event);
+
+                return $this->redirectToRoute('homepage');
+            } catch(\Exception $e){
+                $error = $e->getMessage();
+            }
+        }
+
+        return $this->render(
+            'security/register.html.twig',
+            array('form' => $form->createView(), 'error'=> $error)
+        );
     }
 
     /**
