@@ -52,9 +52,19 @@ class DefaultController extends Controller
      */
     public function deleteArticleAction(Article $article)
     {
-        return $this->render('default/index.html.twig', array(
-            'base_dir' => realpath($this->container->getParameter('kernel.root_dir').'/..').DIRECTORY_SEPARATOR,
-        ));
+        $em = $this->getDoctrine()->getManager();
+
+        if ($article->getAuthor() == $this->getUser()) {
+            try {
+                $em->remove($article);
+                $em->flush();
+                return $this->redirectToRoute('homepage');
+            }
+            catch (\Exception $e) {
+                return $this->redirectToRoute('homepage');
+            }
+        }
+        return $this->redirectToRoute('homepage');
     }
 
     /**
