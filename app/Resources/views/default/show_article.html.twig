@@ -1,0 +1,17 @@
+{% extends 'base.html.twig' %}
+{% block title %}Details{% endblock %}
+{% block content %}
+    <div class="blog-post">
+        <h2 class="blog-post-title">
+            {{ article.title }}
+        </h2>
+        <p class="blog-post-meta">Created at: {{ article.getCreatedAt()|date('Y-m-d H:i:s') }} by {{ article.getAuthor().getUsername() }}</p>
+        {{ article.description|nl2br }}
+    </div>
+    {% if app.user and app.user == article.getAuthor() %}
+        <nav class="blog-pagination">
+            <a class="btn btn-outline-primary" href="{{ path("article_edit", {id: article.id}) }}">Edit</a>
+            <a class="btn btn-outline-secondary" href="{{ path("article_delete", {id: article.id}) }}">Delete</a>
+        </nav>
+    {% endif %}
+{% endblock %}
