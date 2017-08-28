@@ -73,8 +73,29 @@ class DefaultController extends Controller
      */
     public function editArticleAction(Article $article)
     {
-        return $this->render('default/index.html.twig', array(
-            'base_dir' => realpath($this->container->getParameter('kernel.root_dir').'/..').DIRECTORY_SEPARATOR,
-        ));
+        $error = null;
+        $request = $this->container->get('request_stack')->getCurrentRequest();
+        if ($article->getAuthor() != $this->getUser())
+            return $this->redirectToRoute('article_show', ['id' => $article->getId()]);
+        if ( $request->getMethod() == 'POST') {
+            $em = $this->getDoctrine()->getManager();
+            if (empty($request->get('_title')))
+                $error = "Title can't be empty";
+            if (empty($request->get('_description')))
+                $error = "Description can't be empty";
+            if ($error == null) {
+                try {
+                    $article->setTitle($request->get('_title'));
+                    $article->setDescription($request->get('_description'));
+                    $em->persist($article);
+                    $em->flush();
+                }
+                catch (\Exception $e) {
+                    return $this->render('default/edit_article.html.twig', ['article' => $article, 'error' => $e->getMessage()]);
+                }
+                return $this->redirectToRoute('article_show', ['id' => $article->getId()]);
+            }
+        }
+        return $this->render('default/edit_article.html.twig', ['article' => $article, 'error' => $error]);
     }
 }
